@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Order Support Dashboard</title>
+  <style>
+    :root { color-scheme: dark; font-family: system-ui, sans-serif; background: #0f172a; color: #e2e8f0; }
+    body { max-width: 760px; margin: 0 auto; padding: 48px 20px; }
+    main { background: #1e293b; border: 1px solid #334155; border-radius: 16px; padding: 24px; box-shadow: 0 18px 45px rgba(0, 0, 0, 0.3); }
+    h1 { margin-top: 0; }
+    button { border: 0; border-radius: 8px; padding: 10px 16px; background: #38bdf8; color: #082f49; font-weight: 700; cursor: pointer; }
+    #status { min-height: 24px; color: #fbbf24; }
+    #orderList { display: grid; gap: 10px; padding: 0; list-style: none; }
+    #orderList li { padding: 14px; border-radius: 8px; background: #0f172a; border-left: 4px solid #38bdf8; }
+  </style>
+</head>
+<body>
+  <main>
+    <p>Incident Desk</p>
+    <h1>Order Support Dashboard</h1>
+    <p>Use the browser, API client, and server logs to explain every failure before changing code.</p>
+    <button id="reloadButton" type="button">Reload orders</button>
+    <p id="status">Ready</p>
+    <ul id="orderList"></ul>
+  </main>
+  <script>
+    const reloadButton = document.getElementById('reloadButton');
+    const statusMessage = document.getElementById('status');
+    const orderList = document.getElementById('orderList');
+    async function loadOrders() {
+      statusMessage.textContent = 'Loading orders...';
+      orderList.textContent = '';
+      try {
+        const response = await fetch('/api/orders');
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        const data = await response.json();
+        data.orders.forEach((order) => {
+          const item = document.createElement('li');
+          item.textContent = `${order.id} | ${order.customer} | ${order.status}`;
+          orderList.appendChild(item);
+        });
+        statusMessage.textContent = `Loaded ${data.orders.length} orders.`;
+      } catch (error) {
+        console.error('Order load failed:', error);
+        statusMessage.textContent = `Unable to load orders: ${error.message}`;
+      }
+    }
+    reloadButton.addEventListener('click', loadOrders);
+    loadOrders();
+  </script>
+</body>
+</html>
